@@ -173,6 +173,15 @@
 const SUPABASE_URL = "https://hxzdmosganinyhtrswlj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_AYWfHD9vBAVk4Fv1tcuEVw_RTPM71RQ";
 
+// 車牌格式化（統一加 -，如 ABC1234 → ABC-1234）
+function formatCarNo(no) {
+  if (!no) return no;
+  const clean = no.replace(/-/g, '').toUpperCase();
+  const m = clean.match(/^([A-Z]{1,3}\d?)(\d{3,4})$/);
+  if (m) return m[1] + '-' + m[2];
+  return no;
+}
+
 // 民國年轉西元
 function twToDate(twDate) {
   if (!twDate) return "";
@@ -226,7 +235,7 @@ async function doQuery() {
     let html = `
       <div class="card">
         <div class="customer-info">
-          <div class="car">🏍️ ${c.car_no}</div>
+          <div class="car">🏍️ ${formatCarNo(c.car_no)}</div>
           <div class="person">車主：${c.name || "（未填寫）"}${c.address ? '｜' + c.address : ''}</div>
         </div>
         <div class="stats">
