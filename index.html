@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>å¿åº - ç¶­ä¿®å±¥æ­·æ¥è©¢</title>
+<title>忍店 - 維修履歷查詢</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'å¾®è»æ­£é»é«', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, '微軟正黑體', sans-serif;
     background: #f0f4f8;
     min-height: 100vh;
   }
@@ -62,7 +62,7 @@
 
   .hint { font-size: 0.8rem; color: #999; text-align: center; margin-top: 10px; }
 
-  /* çµæå */
+  /* 結果區 */
   #result { display: none; }
 
   .customer-info {
@@ -139,41 +139,41 @@
 <body>
 
 <header>
-  <h1>ð§ å¿åº</h1>
-  <p>ç¶­ä¿®å±¥æ­·æ¥è©¢ç³»çµ±</p>
+  <h1>🔧 忍店</h1>
+  <p>維修履歷查詢系統</p>
 </header>
 
 <div class="container">
-  <!-- æ¥è©¢è¡¨å® -->
+  <!-- 查詢表單 -->
   <div class="card">
-    <h2>æ¥è©¢æ¨çç¶­ä¿®è¨é</h2>
-    <label>è»çèç¢¼</label>
-    <input type="text" id="carNo" placeholder="ä¾ï¼ABC-1234" maxlength="10">
-    <label>ææ©èç¢¼</label>
-    <input type="tel" id="phone" placeholder="ä¾ï¼0912345678" maxlength="15">
-    <button onclick="doQuery()" id="queryBtn">æ¥ è©¢</button>
-    <p class="hint">è»çèææ©éèç»è¨è³æä¸è´</p>
+    <h2>查詢您的維修記錄</h2>
+    <label>車牌號碼</label>
+    <input type="text" id="carNo" placeholder="例：ABC-1234" maxlength="10">
+    <label>手機號碼</label>
+    <input type="tel" id="phone" placeholder="例：0912345678" maxlength="15">
+    <button onclick="doQuery()" id="queryBtn">查 詢</button>
+    <p class="hint">車牌與手機需與登記資料一致</p>
   </div>
 
-  <!-- è¼å¥ä¸­ -->
+  <!-- 載入中 -->
   <div id="loading" style="display:none" class="card">
     <div class="loading">
       <div class="spinner"></div>
-      æ¥è©¢ä¸­ï¼è«ç¨åâ¦
+      查詢中，請稍候…
     </div>
   </div>
 
-  <!-- çµæ -->
+  <!-- 結果 -->
   <div id="result"></div>
 </div>
 
-<footer>å¿åº Â© æ°åå¸æ°èåç¦çè·¯431-8èï½0229066413</footer>
+<footer>忍店 © 新北市新莊區福營路431-8號｜0229066413</footer>
 
 <script>
 const SUPABASE_URL = "https://hxzdmosganinyhtrswlj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_AYWfHD9vBAVk4Fv1tcuEVw_RTPM71RQ";
 
-// æ°åå¹´è½è¥¿å
+// 民國年轉西元
 function twToDate(twDate) {
   if (!twDate) return "";
   const m = twDate.match(/^(\d+)\/(\d+)\/(\d+)/);
@@ -189,7 +189,7 @@ async function doQuery() {
   const phone = document.getElementById("phone").value.trim();
 
   if (!carNo || !phone) {
-    alert("è«è¼¸å¥è»çåææ©èç¢¼");
+    alert("請輸入車牌和手機號碼");
     return;
   }
 
@@ -214,7 +214,7 @@ async function doQuery() {
     document.getElementById("result").style.display = "block";
 
     if (data.error) {
-      document.getElementById("result").innerHTML = `<div class="error-box">â ï¸ ${data.error}</div>`;
+      document.getElementById("result").innerHTML = `<div class="error-box">⚠️ ${data.error}</div>`;
       document.getElementById("queryBtn").disabled = false;
       return;
     }
@@ -226,25 +226,25 @@ async function doQuery() {
     let html = `
       <div class="card">
         <div class="customer-info">
-          <div class="car">ðï¸ ${c.car_no}</div>
-          <div class="person">è»ä¸»ï¼${c.name || "ï¼æªå¡«å¯«ï¼"}${c.address ? 'ï½' + c.address : ''}</div>
+          <div class="car">🏍️ ${c.car_no}</div>
+          <div class="person">車主：${c.name || "（未填寫）"}${c.address ? '｜' + c.address : ''}</div>
         </div>
         <div class="stats">
           <div class="stat-box">
             <div class="num">${repairs.length}</div>
-            <div class="lbl">ç¶­ä¿®æ¬¡æ¸</div>
+            <div class="lbl">維修次數</div>
           </div>
           <div class="stat-box">
             <div class="num">$${totalSpent.toLocaleString()}</div>
-            <div class="lbl">ç´¯è¨æ¶è²»</div>
+            <div class="lbl">累計消費</div>
           </div>
         </div>
-        <h2>æ­·å¹´ç¶­ä¿®è¨é</h2>
+        <h2>歷年維修記錄</h2>
       </div>
     `;
 
     if (repairs.length === 0) {
-      html += `<div class="card"><div class="loading">å°ç¡ç¶­ä¿®è¨é</div></div>`;
+      html += `<div class="card"><div class="loading">尚無維修記錄</div></div>`;
     } else {
       repairs.forEach((r, idx) => {
         const dateStr = r.date_str ? twToDate(r.date_str) : "";
@@ -253,7 +253,7 @@ async function doQuery() {
         details.forEach(d => {
           detailHtml += `
             <div class="detail-row">
-              <span class="item-name">${d.item || ""}ï¼x${d.quantity}ï¼</span>
+              <span class="item-name">${d.item || ""}（x${d.quantity}）</span>
               <span class="item-amt">$${parseInt(d.amount || 0).toLocaleString()}</span>
             </div>`;
         });
@@ -264,10 +264,10 @@ async function doQuery() {
               <span class="date">${dateStr} ${r.time_str || ""}</span>
               <span class="amount">$${(r.total_amount || 0).toLocaleString()}</span>
             </div>
-            ${r.current_mileage > 0 ? `<div class="mileage">éç¨ï¼${(r.last_mileage||0).toLocaleString()} â ${(r.current_mileage||0).toLocaleString()} kmï½å¸«åï¼${r.technician || "-"}</div>` : ''}
-            ${r.notes ? `<div class="notes">ð ${r.notes}</div>` : ''}
+            ${r.current_mileage > 0 ? `<div class="mileage">里程：${(r.last_mileage||0).toLocaleString()} → ${(r.current_mileage||0).toLocaleString()} km｜師傅：${r.technician || "-"}</div>` : ''}
+            ${r.notes ? `<div class="notes">📝 ${r.notes}</div>` : ''}
             <div class="detail-list" id="detail-${idx}">
-              ${detailHtml || "<div style='color:#aaa;font-size:0.85rem'>ç¡æç´°</div>"}
+              ${detailHtml || "<div style='color:#aaa;font-size:0.85rem'>無明細</div>"}
             </div>
           </div>`;
       });
@@ -278,7 +278,7 @@ async function doQuery() {
   } catch (e) {
     document.getElementById("loading").style.display = "none";
     document.getElementById("result").style.display = "block";
-    document.getElementById("result").innerHTML = `<div class="error-box">â ï¸ é£ç·é¯èª¤ï¼è«ç¨å¾åè©¦<br><small>${e.message}</small></div>`;
+    document.getElementById("result").innerHTML = `<div class="error-box">⚠️ 連線錯誤，請稍後再試<br><small>${e.message}</small></div>`;
   }
 
   document.getElementById("queryBtn").disabled = false;
@@ -289,7 +289,7 @@ function toggleDetail(idx) {
   el.classList.toggle("open");
 }
 
-// æ Enter æ¥è©¢
+// 按 Enter 查詢
 document.addEventListener("keydown", e => {
   if (e.key === "Enter") doQuery();
 });
