@@ -173,13 +173,12 @@
 const SUPABASE_URL = "https://hxzdmosganinyhtrswlj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_AYWfHD9vBAVk4Fv1tcuEVw_RTPM71RQ";
 
-// 車牌格式化（統一加 -，如 ABC1234 → ABC-1234）
+// 車牌格式化：前3碼 + - + 其餘（如 NAS8967 → NAS-8967）
 function formatCarNo(no) {
   if (!no) return no;
   const clean = no.replace(/-/g, '').toUpperCase();
-  const m = clean.match(/^([A-Z]{1,3}\d?)(\d{3,4})$/);
-  if (m) return m[1] + '-' + m[2];
-  return no;
+  if (clean.length >= 4) return clean.slice(0, 3) + '-' + clean.slice(3);
+  return clean;
 }
 
 // 民國年轉西元
