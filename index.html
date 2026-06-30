@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>金旺昇車業 - 維修履歷查詢</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, '微軟正黑體', sans-serif;
+    background: #f0f4f8;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+    padding: 24px 20px;
+    text-align: center;
+  }
+  header h1 { font-size: 1.6rem; letter-spacing: 2px; }
+  header p  { font-size: 0.85rem; color: #aac4ff; margin-top: 4px; }
+
+  .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+  }
+
+  .card h2 { font-size: 1.1rem; color: #333; margin-bottom: 16px; }
+
+  label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 4px; }
+  input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    margin-bottom: 14px;
+    transition: border 0.2s;
+    text-transform: uppercase;
+  }
+  input:focus { outline: none; border-color: #3b82f6; }
+
+  button {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: opacity 0.2s;
+  }
+  button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .hint { font-size: 0.8rem; color: #999; text-align: center; margin-top: 10px; }
+
+  /* 結果區 */
+  #result { display: none; }
+
+  .customer-info {
+    background: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    padding: 12px 16px;
+    border-radius: 0 10px 10px 0;
+    margin-bottom: 16px;
+  }
+  .customer-info .car { font-size: 1.4rem; font-weight: bold; color: #1d4ed8; letter-spacing: 2px; }
+  .customer-info .person { font-size: 0.9rem; color: #555; margin-top: 2px; }
+
+  .stats {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .stat-box {
+    flex: 1;
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+  }
+  .stat-box .num { font-size: 1.5rem; font-weight: bold; color: #1d4ed8; }
+  .stat-box .lbl { font-size: 0.75rem; color: #888; }
+
+  .repair-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+  }
+  .repair-item:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+  .repair-item .row1 { display: flex; justify-content: space-between; align-items: center; }
+  .repair-item .date { font-size: 0.85rem; color: #888; }
+  .repair-item .amount { font-size: 1.1rem; font-weight: bold; color: #059669; }
+  .repair-item .mileage { font-size: 0.8rem; color: #aaa; margin-top: 4px; }
+  .repair-item .notes { font-size: 0.85rem; color: #555; margin-top: 4px; background: #fffbeb; padding: 4px 8px; border-radius: 6px; }
+
+  .detail-list { display: none; margin-top: 10px; border-top: 1px solid #f0f0f0; padding-top: 10px; }
+  .detail-list.open { display: block; }
+  .detail-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 4px 0; border-bottom: 1px dashed #f0f0f0; }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row .item-name { color: #444; flex: 1; }
+  .detail-row .item-amt  { color: #059669; font-weight: bold; min-width: 60px; text-align: right; }
+
+  .error-box {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+    padding: 14px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+
+  .loading { text-align: center; padding: 30px; color: #888; }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid #e0e0e0;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 10px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  footer { text-align: center; font-size: 0.8rem; color: #bbb; padding: 20px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔧 金旺昇車業</h1>
+  <p>維修履歷查詢系統</p>
+</header>
+
+<div class="container">
+  <!-- 查詢表單 -->
+  <div class="card">
+    <h2>查詢您的維修記錄</h2>
+    <label>車牌號碼</label>
+    <input type="text" id="carNo" placeholder="例：ABC-1234" maxlength="10">
+    <label>手機號碼</label>
+    <input type="tel" id="phone" placeholder="例：0912345678" maxlength="15">
+    <button onclick="doQuery()" id="queryBtn">查 詢</button>
+    <p class="hint">車牌與手機需與登記資料一致</p>
+  </div>
+
+  <!-- 載入中 -->
+  <div id="loading" style="display:none" class="card">
+    <div class="loading">
+      <div class="spinner"></div>
+      查詢中，請稍候…
+    </div>
+  </div>
+
+  <!-- 結果 -->
+  <div id="result"></div>
+</div>
+
+<footer>金旺昇車業 © 新北市新莊區福營路431-8號｜0229066413</footer>
+
+<script>
+const SUPABASE_URL = "https://hxzdmosganinyhtrswlj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_AYWfHD9vBAVk4Fv1tcuEVw_RTPM71RQ";
+
+// 民國年轉西元
+function twToDate(twDate) {
+  if (!twDate) return "";
+  const m = twDate.match(/^(\d+)\/(\d+)\/(\d+)/);
+  if (m) {
+    const y = parseInt(m[1]) + 1911;
+    return `${y}/${m[2]}/${m[3]}`;
+  }
+  return twDate;
+}
+
+async function doQuery() {
+  const carNo = document.getElementById("carNo").value.trim().toUpperCase();
+  const phone = document.getElementById("phone").value.trim();
+
+  if (!carNo || !phone) {
+    alert("請輸入車牌和手機號碼");
+    return;
+  }
+
+  document.getElementById("queryBtn").disabled = true;
+  document.getElementById("loading").style.display = "block";
+  document.getElementById("result").innerHTML = "";
+  document.getElementById("result").style.display = "none";
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_repair_history`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ p_car_no: carNo, p_phone: phone })
+    });
+
+    const data = await res.json();
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("result").style.display = "block";
+
+    if (data.error) {
+      document.getElementById("result").innerHTML = `<div class="error-box">⚠️ ${data.error}</div>`;
+      return;
+    }
+
+    const c = data.customer;
+    const repairs = data.repairs || [];
+    const totalSpent = repairs.reduce((s, r) => s + (r.total_amount || 0), 0);
+
+    let html = `
+      <div class="card">
+        <div class="customer-info">
+          <div class="car">🏍️ ${c.car_no}</div>
+          <div class="person">車主：${c.name || "（未填寫）"}｜${c.address || ""}</div>
+        </div>
+        <div class="stats">
+          <div class="stat-box">
+            <div class="num">${repairs.length}</div>
+            <div class="lbl">維修次數</div>
+          </div>
+          <div class="stat-box">
+            <div class="num">$${totalSpent.toLocaleString()}</div>
+            <div class="lbl">累計消費</div>
+          </div>
+        </div>
+        <h2>歷年維修記錄</h2>
+      </div>
+    `;
+
+    if (repairs.length === 0) {
+      html += `<div class="card"><div class="loading">尚無維修記錄</div></div>`;
+    } else {
+      repairs.forEach((r, idx) => {
+        const dateStr = r.date_str ? twToDate(r.date_str) : "";
+        const details = r.details || [];
+        let detailHtml = "";
+        details.forEach(d => {
+          detailHtml += `
+            <div class="detail-row">
+              <span class="item-name">${d.item || ""}（x${d.quantity}）</span>
+              <span class="item-amt">$${parseInt(d.amount || 0).toLocaleString()}</span>
+            </div>`;
+        });
+
+        html += `
+          <div class="repair-item" onclick="toggleDetail(${idx})">
+            <div class="row1">
+              <span class="date">� ${dateStr} ${r.time_str || ""}</span>
+              <span class="amount">$${(r.total_amount || 0).toLocaleString()}</span>
+            </div>
+            ${r.current_mileage > 0 ? `<div class="mileage">里程：${(r.last_mileage||0).toLocaleString()} → ${(r.current_mileage||0).toLocaleString()} km｜師傅：${r.technician || "-"}</div>` : ''}
+            ${r.notes ? `<div class="notes">📝 ${r.notes}</div>` : ''}
+            <div class="detail-list" id="detail-${idx}">
+              ${detailHtml || "<div style='color:#aaa;font-size:0.85rem'>無明細</div>"}
+            </div>
+          </div>`;
+      });
+    }
+
+    document.getElementById("result").innerHTML = html;
+
+  } catch (e) {
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("result").style.display = "block";
+    document.getElementById("result").innerHTML = `<div class="error-box">⚠️ 連線錯誤，請稍後再試<br><small>${e.message}</small></div>`;
+  }
+
+  document.getElementById("queryBtn").disabled = false;
+}
+
+function toggleDetail(idx) {
+  const el = document.getElementById(`detail-${idx}`);
+  el.classList.toggle("open");
+}
+
+// 按 Enter 查詢
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter") doQuery();
+});
+</script>
+</body>
+</html>
