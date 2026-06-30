@@ -215,6 +215,7 @@ async function doQuery() {
 
     if (data.error) {
       document.getElementById("result").innerHTML = `<div class="error-box">⚠️ ${data.error}</div>`;
+      document.getElementById("queryBtn").disabled = false;
       return;
     }
 
@@ -290,8 +291,4 @@ function toggleDetail(idx) {
 
 // 按 Enter 查詢
 document.addEventListener("keydown", e => {
-  if (e.key === "Enter") doQuery();
-});
-</script>
-</body>
-</html>
+  if (
